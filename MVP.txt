@@ -1,0 +1,19 @@
+Capstone MVP 
+
+Project Name : LOL Tracker
+
+
+
+- ive always liked the idea of being able to track game stats especially in games where looking over
+previous games can help you improve in the next, like League of Legends. My app will let you look for any person 
+that has a registered account in the game and get their stats from their last 5-7 games.
+The app will let you compare stats to other players as well.
+This will all be done using the League of Legends API.
+
+
+MVP: 
+- Users can login using Riot account
+- Users can log out
+- Users can search for players 
+- Users can view own stats via log in
+- Users can compare stats of other players 
