@@ -3,17 +3,22 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import Main from "./main";
 import reportWebVitals from "./reportWebVitals";
-import App from "./App"
-import { PlayerCard } from "./PlayerCard";
+import { AuthProvider } from "./login"
+import {Header}  from "./Header";
 
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
+    <AuthProvider>
+    <Header />
     <Main />
+    
     {/* <PlayerCard /> */}
+    </AuthProvider>
   </React.StrictMode>
 );
+
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

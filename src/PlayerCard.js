@@ -18,13 +18,16 @@ export const PlayerCard = ({
   flexPoints,
   flexWinRate,
 }) => {
+  let totalMastery = mastery.reduce((acc,cuv) => {
+   return acc + cuv.championPoints
+  }, 0)
   return (
     <>
       <div className={"cardWrapper"}>
         <div className={"summonerStats"}>
           <h1> Name: {summonerName}</h1>
           <h2> Level: {summonerLevel}</h2>
-          <h2> Total Champion Mastery : {mastery}</h2>
+          <h2> Total Champion Mastery : {totalMastery} </h2>
         </div>
 
         <div className={"soloStats"}>

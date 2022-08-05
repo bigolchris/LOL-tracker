@@ -5,7 +5,8 @@ import ReactDom from "react-dom/client";
 import "./App.css";
 import { PlayerCard } from "./PlayerCard";
 
-const API_KEY = "RGAPI-95a6c95b-690a-46c7-8cfd-ed864d0d4984";
+
+const API_KEY = "RGAPI-bdc44ec6-9fc5-4ba6-9438-79e53a644f6b";
 
 const Main = () => {
   const [name, setName] = useState("");
@@ -16,7 +17,7 @@ const Main = () => {
   const [winRateFlex, setWinRateFlex] = useState(0);
   const [summonerLvL, setSummonerLvL] = useState(0);
   const [id, setId] = useState(null);
-  const [totalMastery, setTotalMastery] = useState(0);
+  const [totalMastery, setTotalMastery] = useState([]);
   //   const [region, setRegion] = useState("na1.api.riotgames.com");
   // const history = useHistory();
   const [flexStats, setFlexStats] = useState({
@@ -133,7 +134,7 @@ const Main = () => {
       })
       .then((data) => {
         const newFlexStats = {
-          Tier: data[1].tier,
+          tier: data[1].tier,
           rank: data[1].rank,
           leaguePoints: data[1].leaguePoints,
           wins: data[1].wins,
@@ -143,7 +144,7 @@ const Main = () => {
         console.log(newFlexStats);
 
         const newRankedStats = {
-          Tier: data[0].tier,
+          tier: data[0].tier,
           rank: data[0].rank,
           leaguePoints: data[0].leaguePoints,
           wins: data[0].wins,
@@ -161,7 +162,8 @@ const Main = () => {
 
   if (id !== null)
     return (
-      <PlayerCard
+
+      <PlayerCard 
         summonerName={name}
         summonerLevel={summonerLvL}
         mastery={totalMastery}
@@ -177,9 +179,10 @@ const Main = () => {
         flexPoints={flexStats.leaguePoints}
         flexRank={flexStats.rank}
         flexWinRate={winRateFlex}
+      
       />
     );
-
+      console.log(totalMastery)
   return (
     <>
       <div className={"main-header"}>
