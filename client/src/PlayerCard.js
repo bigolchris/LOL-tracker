@@ -1,39 +1,34 @@
 import React, { useContext } from "react";
 import { AuthContext } from "./login"
 import axios from "axios";
+import { setDatabase, set, ref } from "./firebase";
 
 
 export const PlayerCard = ({
   summonerName,
   summonerLevel,
   mastery,
-  soloTier,
-  soloWins,
-  soloLoss,
-  soloPoints,
-  soloRank,
+  soloQStats,
   soloWinRate,
-  flexTier,
-  flexWins,
-  flexLoss,
-  flexRank,
-  flexPoints,
   flexWinRate,
-  
+  flexStats,
+  setFavorites
 }) => {
   const context = useContext(AuthContext)
-  console.log(context.currentUser.uid)
   let totalMastery = mastery.reduce((acc,cuv) => {
    return acc + cuv.championPoints
   }, 0)
+  // const body = {userId:context.currentUser.uid, summonerName:summonerName}
   const addFavorites = () => {
-    axios.post('/favorites', {userId:context.currentUser.uid, summonerName:summonerName})
+    // console.log(body)
+    // axios.post('/favorites', body)
+
+    setFavorites(prev => [...prev, summonerName]);
   }
   return (
-    <>
-      <div className={"cardWrapper"}>
+        <div className={"cardContainer"}>
         <div className={"summonerStats"}>
-          <h1> Name: {summonerName}</h1>
+          <h1> {summonerName}</h1>
           <h2> Level: {summonerLevel}</h2>
           <h2> Total Champion Mastery : {totalMastery} </h2>
         </div>
@@ -41,28 +36,29 @@ export const PlayerCard = ({
         <div className={"soloStats"}>
           <h2>Solo Stats</h2>
           <p>
-            Division : {soloTier} {soloRank}
+            Division : {soloQStats.tier} {soloQStats.rank}
           </p>
-          <p>League Points : {soloPoints}</p>
+          <p>League Points : {soloQStats.leaguePoints}</p>
           <p>
-            Wins {soloWins} / Losses {soloLoss}
+            Wins {soloQStats.wins} / Losses {soloQStats.losses}
           </p>
           <p>Win Rate {soloWinRate}</p>
         </div>
+        {flexStats.tier ? 
         <div className={"flexStats"}>
           <h2>Flex 5v5 Stats</h2>
           <p>
-            Division: {flexTier} {flexRank}
+            Division: {flexStats.tier === null ? "noflex" : flexStats.tier} {flexStats.rank}
           </p>
-          <p>League Points : {flexPoints} LP</p>
+          <p>League Points : {flexStats.leaguePoints} LP</p>
           <p>
-            Wins {flexWins} / Losses {flexLoss}
+            Wins {flexStats.wins} / Losses {flexStats.losses}
           </p>
           <p>Win Rate {flexWinRate}</p>
+        </div> : <h2>Flex Stats Unavailable</h2>}
+        <button className="favorite-btn" onClick={() => addFavorites(setFavorites)}>🤍</button>
         </div>
-      </div>
-      <button className="favorite-btn" onClick={() => addFavorites()}>Favorite</button>
-    </>
+    
   );
 };
 

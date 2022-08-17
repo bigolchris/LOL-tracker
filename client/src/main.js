@@ -4,59 +4,21 @@ import logo from "./logo.svg";
 import ReactDom from "react-dom/client";
 import "./App.css";
 import { PlayerCard } from "./PlayerCard";
+import { Favorites } from "./Favorites";
 
-
-const API_KEY = "RGAPI-c6c8168e-359a-4f35-82ba-fabace1205d8";
+const API_KEY = "RGAPI-d69bab3c-b353-4538-9971-6c74dcb7d169";
 
 const Main = () => {
+  const [summoners, setSummoners] = useState([]);
+  const [favorites, setFavorites] = useState([]);
   const [name, setName] = useState("");
-  const [puuid, setPuuid] = useState("");
-  const [accId, setAccId] = useState("");
-  const [isAvailable, setIsAvailable] = useState(null);
-  const [winRateSolo, setWinRateSolo] = useState(0);
-  const [winRateFlex, setWinRateFlex] = useState(0);
-  const [summonerLvL, setSummonerLvL] = useState(0);
-  const [id, setId] = useState(null);
-  const [totalMastery, setTotalMastery] = useState([]);
-  //   const [region, setRegion] = useState("na1.api.riotgames.com");
-  // const history = useHistory();
-  const [flexStats, setFlexStats] = useState({
-    tier: "",
-    rank: "",
-    leaguePoints: 0,
-    hotStreak: false,
-    wins: 0,
-    losses: 0,
-  });
-  const [soloQstats, setSoloQstats] = useState({
-    tier: "",
-    rank: "",
-    leaguePoints: 0,
-    hotStreak: false,
-    wins: 0,
-    losses: 0,
-  });
 
   const handleSetName = (e) => {
     setName(e.target.value);
   };
 
-  useEffect(() => {}, [totalMastery]);
-
-  useEffect(() => {
-    setWinRateFlex(
-      Math.floor((flexStats.wins / (flexStats.wins + flexStats.losses)) * 100) +
-        "%"
-    );
-    setWinRateSolo(
-      Math.floor(
-        (soloQstats.wins / (soloQstats.wins + soloQstats.losses)) * 100
-      ) + "%"
-    );
-  }, [soloQstats, flexStats]);
-
-  const getStats = (url) => {
-    fetch(url, {
+  const getStats = async (url, newSummoner) => {
+    await fetch(url, {
       method: "GET",
       headers: {
         "X-Riot-Token": `${API_KEY}`,
@@ -67,39 +29,21 @@ const Main = () => {
         return resp.json();
       })
       .then((data) => {
-        setPuuid(data.puuid);
-        setSummonerLvL(data.summonerLevel);
-        setAccId(data.accountId);
-        setId(data.id);
-        setIsAvailable(true);
+        newSummoner.puuid = data.puuid;
+        newSummoner.summonerLvL = data.summonerLevel;
+        newSummoner.accId = data.accountId;
+        newSummoner.id = data.id;
+        newSummoner.isAvailable = true;
         console.log(data);
       })
       .catch((err) => {
         console.log(err);
-        setIsAvailable(false);
+        newSummoner.isAvailable = false;
       });
   };
 
-  const handleGetSummoner = (e) => {
-    e.preventDefault();
-    getStats(
-      `https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${name}`
-    );
-  };
-
-  useEffect(() => {
-    if (id !== null) {
-      getMastery(
-        `https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${id}`
-      );
-      getRankedStats(
-        `https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/${id}`
-      );
-    }
-  }, [id]);
-
-  const getMastery = (url) => {
-    fetch(url, {
+  const getMastery = async (url, newSummoner) => {
+    await fetch(url, {
       method: "GET",
       headers: {
         "X-Riot-Token": `${API_KEY}`,
@@ -111,38 +55,51 @@ const Main = () => {
       })
       .then((data) => {
         console.log(data);
-        setTotalMastery(data);
-        
+        newSummoner.totalMastery = data;
       })
       .catch((err) => {
         console.log(err);
-        setIsAvailable(false);
+        newSummoner.isAvailable = false;
       });
   };
 
-  const getRankedStats = (url) => {
-    fetch(url, {
+  const getRankedStats = async (url, newSummoner) => {
+    await fetch(url, {
       method: "GET",
       headers: {
         "X-Riot-Token": `${API_KEY}`,
       },
     })
       .then((resp) => {
-        console.log(resp)
+        console.log(resp);
         return resp.json();
-        
       })
       .then((data) => {
-        const newFlexStats = {
-          tier: data[1].tier,
-          rank: data[1].rank,
-          leaguePoints: data[1].leaguePoints,
-          wins: data[1].wins,
-          losses: data[1].losses,
-        };
-        setFlexStats(newFlexStats);
-        console.log(newFlexStats);
-
+        console.log(data);
+        if (data.length > 1) {
+          const newFlexStats = {
+            tier: data[1].tier,
+            rank: data[1].rank,
+            leaguePoints: data[1].leaguePoints,
+            wins: data[1].wins,
+            losses: data[1].losses,
+          };
+          newSummoner.flexStats = { ...newFlexStats };
+          newSummoner.flexWinRate =
+            Math.floor(
+              (newFlexStats.wins / (newFlexStats.wins + newFlexStats.losses)) *
+                100
+            ) + "%";
+        } else {
+          newSummoner.flexStats = {
+            tier: "",
+            rank: "",
+            leaguePoints: 0,
+            hotStreak: false,
+            wins: 0,
+            losses: 0,
+          };
+        }
         const newRankedStats = {
           tier: data[0].tier,
           rank: data[0].rank,
@@ -150,70 +107,118 @@ const Main = () => {
           wins: data[0].wins,
           losses: data[0].losses,
         };
-        
-        setSoloQstats(newRankedStats);
-        console.log(newRankedStats);
+        newSummoner.soloQStats = { ...newRankedStats };
+        newSummoner.soloWinRate =
+          Math.floor(
+            (newRankedStats.wins /
+              (newRankedStats.wins + newRankedStats.losses)) *
+              100
+          ) + "%";
       })
       .catch((err) => {
         console.log(err);
-        setIsAvailable(false);
+        newSummoner.isAvailable = false;
       });
   };
 
-  if (id !== null)
-    return (
+  const handleGetSummoner = async (e, name) => {
+    e.preventDefault();
 
-      <PlayerCard 
-        summonerName={name}
-        summonerLevel={summonerLvL}
-        mastery={totalMastery}
-        soloTier={soloQstats.tier}
-        soloWins={soloQstats.wins}
-        soloLoss={soloQstats.losses}
-        soloPoints={soloQstats.leaguePoints}
-        soloRank={soloQstats.rank}
-        soloWinRate={winRateSolo}
-        flexTier={flexStats.tier}
-        flexWins={flexStats.wins}
-        flexLoss={flexStats.losses}
-        flexPoints={flexStats.leaguePoints}
-        flexRank={flexStats.rank}
-        flexWinRate={winRateFlex}
-      
-      />
+    let newSummoner = {
+      name: "",
+      puuid: "",
+      accId: "",
+      isAvailable: null,
+      soloWinRate: 0,
+      flexWinRate: 0,
+      summonerLvL: 0,
+      id: null,
+      totalMastery: [],
+      flexStats: {
+        tier: "",
+        rank: "",
+        leaguePoints: 0,
+        hotStreak: false,
+        wins: 0,
+        losses: 0,
+      },
+      soloQStats: {
+        tier: "",
+        rank: "",
+        leaguePoints: 0,
+        hotStreak: false,
+        wins: 0,
+        losses: 0,
+      },
+    };
+
+    await getStats(
+      `http://localhost:3001/stats?username=${name}`,
+      newSummoner
     );
-      console.log(totalMastery)
+    await getMastery(
+      `http://localhost:3001/mastery?id=${newSummoner.id}`,
+      newSummoner
+    );
+    await getRankedStats(
+      `http://localhost:3001/ranked?id=${newSummoner.id}`,
+      newSummoner
+    );
+    newSummoner.name = name;
+    setSummoners((prev) => [...prev, newSummoner]);
+  };
+
   return (
-    <>
+    <div className="main">
       <div className={"main-header"}>
         <div className={"headerWrapper"}>
           <h1 className={"headerWrapper_title"}>Search For League Players!</h1>
-          <h2 className={"headerWrapper_gretting"}>Enjoy!</h2>
+          {/* <h2 className={"headerWrapper_gretting"}>Enjoy!</h2> */}
+          <form className={"formWrapper_form"}>
+            <div className={"formWrapper_1st-row row"}>
+              <input
+                className={"formWrapper_name"}
+                type={"text"}
+                placeholder={"Summoner name"}
+                onChange={handleSetName}
+              />
+            </div>
+            <div className={"formWrapper_2nd-row row"}>
+              <button
+                className={"formWrapper_btn-submit"}
+                onClick={(e) => handleGetSummoner(e, name)}
+                type={"submit"}
+              >
+                Search
+              </button>
+            </div>
+          </form>
         </div>
       </div>
       <div className={"main_body"}>
-        <form className={"formWrapper_form"}>
-          <div className={"formWrapper_1st-row row"}>
-            <input
-              className={"formWrapper_name"}
-              type={"text"}
-              placeholder={"Summoner name"}
-              onChange={handleSetName}
-            />
-          </div>
-          <div className={"formWrapper_2nd-row row"}>
-            <button
-              className={"formWrapper_btn-submit"}
-              onClick={handleGetSummoner}
-              type={"submit"}
-            >
-              Search
-            </button>
-          </div>
-        </form>
+        <div className="card-wrapper">
+          {summoners.length > 0
+            ? summoners.map((summoner, index) => {
+                return (
+                  <PlayerCard
+                    summonerName={summoner.name}
+                    summonerLevel={summoner.summonerLvL}
+                    mastery={summoner.totalMastery}
+                    soloQStats={summoner.soloQStats}
+                    soloWinRate={summoner.soloWinRate}
+                    flexWinRate={summoner.flexWinRate}
+                    flexStats={summoner.flexStats}
+                    setFavorites={setFavorites}
+                    key={index}
+                  />
+                );
+              })
+            : null}
+        </div>
+        <div className="favorites-container"></div>
+        <Favorites favorites={favorites} getSummoner={handleGetSummoner}></Favorites>
       </div>
-    </>
+    </div>
   );
 };
-
 export default Main;

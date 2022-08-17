@@ -10,9 +10,8 @@ export function Header() {
     const { currentUser, signout} = useAuth()
     const [cardOpen, setCardOpen] = useState(false)
     const [cardType, setCardType] = useState(null)
+    const [formOpen, setFormOpen] = useState(false);
     
-
-
 
     function accountButtonClick(type) {
         setCardOpen(true);
@@ -24,23 +23,12 @@ export function Header() {
       }
     
       function renderButtons() {
-        if(currentUser) {
+        if(currentUser && !formOpen) {
             return (
                 <div className="btn-group">
-                    <button className="from-btn signout" onClick={signOut}>Signout</button>
+                    <button className="from-signout" onClick={signOut}>Signout</button>
                 </div>
             )
-        } else {
-            // return (
-            //     <div className="btn-group">
-            //         <button className="form-btn lgin" onClick={() => accountButtonClick("login")}>
-            //             login
-            //         </button>
-            //         <button className="btn-group" onClick={() => accountButtonClick("signup")}>
-            //             sign up
-            //         </button>
-            //     </div>
-            // )
         }
       }
     
@@ -48,12 +36,7 @@ export function Header() {
     <header>
         <div ref={navRef} className="nav-bar">
             {renderButtons()}
-            <LoginForm 
-                isOpen={cardOpen}
-                setIsOpen={setCardOpen}
-                type={cardType}
-                setType={setCardType}
-            />
+            <LoginForm setIsFormOpen={setFormOpen}/>
         </div>
         {/* <LoginForm></LoginForm> */}
     </header>
