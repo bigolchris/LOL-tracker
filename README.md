@@ -2,6 +2,8 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+nodemon server is need to run this site along with npm start, to use update the API key in the index.js file in the server
+folder and in main.js in the src folder. Enjoy:)
 ## Available Scripts
 
 In the project directory, you can run:
